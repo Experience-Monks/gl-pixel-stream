@@ -1,0 +1,58 @@
+{
+  "name": "gl-pixel-stream",
+  "version": "1.0.0",
+  "description": "streaming gl.readPixels from an FBO",
+  "main": "index.js",
+  "license": "MIT",
+  "author": {
+    "name": "Matt DesLauriers",
+    "email": "dave.des@gmail.com",
+    "url": "https://github.com/mattdesl"
+  },
+  "dependencies": {
+    "readable-stream": "^2.0.3"
+  },
+  "devDependencies": {
+    "a-big-triangle": "^1.0.2",
+    "concat-stream": "^1.5.1",
+    "faucet": "0.0.1",
+    "gl-fbo": "^2.0.5",
+    "gl-shader": "^4.0.5",
+    "glsl-earth": "^1.0.2",
+    "glsl-film-grain": "^1.0.2",
+    "glsl-shader-basic": "^1.0.0",
+    "glslify": "^2.3.1",
+    "png-stream": "^1.0.4",
+    "tape": "^4.2.2",
+    "webgl-context": "^2.2.0"
+  },
+  "scripts": {
+    "dev": "hihat demo.js --node --browser-field -- -t glslify",
+    "start": "NODE_ENV=production hihat demo.js --exec --node --browser-field -- -t glslify",
+    "test": "hihat test.js --exec --timeout=1000 | faucet"
+  },
+  "keywords": [
+    "streaming",
+    "fbo",
+    "stackgl",
+    "readPixels",
+    "gl",
+    "webgl",
+    "glsl",
+    "save",
+    "export",
+    "write",
+    "render",
+    "png",
+    "image",
+    "framebuffer"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/Jam3/gl-pixel-stream.git"
+  },
+  "homepage": "https://github.com/Jam3/gl-pixel-stream",
+  "bugs": {
+    "url": "https://github.com/Jam3/gl-pixel-stream/issues"
+  }
+}
