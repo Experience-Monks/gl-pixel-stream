@@ -6,6 +6,12 @@ Streams chunks of `gl.readPixels` from the specified FrameBuffer Object. This is
 
 Before calling this method, ensure your FBO is populated with the content you wish to export. On each chunk, this will bind the given FBO, set the viewport, read the new pixels, and then unbind all FBOs.
 
+The following image was generated with the [demo.js](./demo.js) in this module. This approach can render upwards of 10000x10000 images on a late 2013 MacBookPro.
+
+![earth](http://i.imgur.com/ee6nE6i.png)
+
+[(download full 3200x1800 image)](https://www.dropbox.com/s/crojjnh5in2bgsi/gl-pixel-stream.png?dl=0)
+
 ## Install
 
 ```sh
@@ -86,7 +92,7 @@ To run the demo in "development" mode. This opens a DevTools window and reloads 
 npm run dev
 ```
 
-The output `image.png` should look like this:
+The output `image.png` should look like this, and be the size specified in the `demo.js` file:
 
 ![earth](http://i.imgur.com/ee6nE6i.png)
 
