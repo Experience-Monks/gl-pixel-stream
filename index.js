@@ -37,7 +37,9 @@ function glPixelStream (gl, fboHandle, size, opt) {
 
   function read () {
     if (currentChunk > totalChunks - 1) {
-      return stream.push(null)
+      return process.nextTick(function () {
+        stream.push(null)
+      })
     }
 
     var yOffset = chunkSize * currentChunk
