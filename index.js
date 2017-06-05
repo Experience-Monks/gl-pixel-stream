@@ -15,21 +15,21 @@ function glPixelStream (gl, fboHandle, size, opt) {
   
   opt = opt || {}
   
-  var width = size[0]
-  var height = size[1]
+  var width = Math.floor(size[0])
+  var height = Math.floor(size[1])
   var flipY = opt.flipY
   var format = opt.format || gl.RGBA
   var stride = typeof opt.stride === 'number'
     ? opt.stride : guessStride(gl, format)
-  var chunkSize = typeof opt.chunkSize !== 'undefined'
+  var chunkSize = typeof opt.chunkSize === 'number'
     ? opt.chunkSize : DEFAULT_CHUNK_SIZE
+  var onProgress = opt.onProgress
   
   // clamp chunk size
-  chunkSize = Math.min(chunkSize | 0, height)
+  chunkSize = Math.min(Math.floor(chunkSize), height)
 
   var totalChunks = Math.ceil(height / chunkSize)
   var currentChunk = 0
-  var chunkData = new Uint8Array(width * chunkSize * stride)
   var stream = new Readable()
   stream._read = read
   return stream
@@ -41,11 +41,6 @@ function glPixelStream (gl, fboHandle, size, opt) {
       })
     }
 
-    var yOffset = chunkSize * currentChunk
-    if (flipY) {
-      yOffset = height - yOffset - chunkSize
-    }
-
     gl.bindFramebuffer(gl.FRAMEBUFFER, fboHandle)
     var status = gl.checkFramebufferStatus(gl.FRAMEBUFFER)
     if (status !== gl.FRAMEBUFFER_COMPLETE) {
@@ -55,21 +50,53 @@ function glPixelStream (gl, fboHandle, size, opt) {
       })
     }
 
+    var yOffset = chunkSize * currentChunk
+    var dataHeight = Math.min(chunkSize, height - yOffset)
+    if (flipY) {
+      yOffset = height - yOffset - dataHeight
+    }
+
+    var outBuffer = new Buffer(width * dataHeight * stride)
     gl.viewport(0, 0, width, height)
-    gl.readPixels(0, yOffset, width, chunkSize, format, gl.UNSIGNED_BYTE, chunkData)
+    gl.readPixels(0, yOffset, width, dataHeight, format, gl.UNSIGNED_BYTE, outBuffer)
     gl.bindFramebuffer(gl.FRAMEBUFFER, null)
 
-    var rowBuffer = Buffer.from(chunkData)
+    var rowBuffer = outBuffer
     if (flipY) {
-      for (var y = chunkSize - 1, c = 0; y >= 0; y--) {
-        var offset = (y * width) * stride
-        for (var j = 0; j < width * stride; j++) {
-          rowBuffer[c++] = chunkData[offset + j]
-        }
-      }
+      flipVertically(outBuffer, width, dataHeight, stride)
     }
     currentChunk++
+    if (typeof onProgress === 'function') {
+      onProgress({
+        bounds: [ 0, yOffset, width, dataHeight ],
+        current: currentChunk,
+        total: totalChunks
+      })
+    }
     stream.push(rowBuffer)
+  }
+}
+
+function flipVertically (pixels, width, height, stride) {
+  var rowLength = width * stride
+  // var temp = Buffer.alloc(rowLength)
+  var temp = Buffer.allocUnsafe(rowLength)
+  // var temp = new Buffer(rowLength)
+  var halfRows = Math.floor(height / 2)
+  for (var rowIndex = 0; rowIndex < halfRows; rowIndex++) {
+    var otherRowIndex = height - rowIndex - 1;
+
+    var curRowStart = rowLength * rowIndex;
+    var curRowEnd = curRowStart + rowLength;
+    var otherRowStart = rowLength * otherRowIndex;
+    var otherRowEnd = otherRowStart + rowLength;
+
+    // copy current row into temp
+    pixels.copy(temp, 0, curRowStart, curRowEnd)
+    // now copy other row into current row
+    pixels.copy(pixels, curRowStart, otherRowStart, otherRowEnd)
+    // and now copy temp back to other slot
+    temp.copy(pixels, otherRowStart, 0, rowLength)
   }
 }
 

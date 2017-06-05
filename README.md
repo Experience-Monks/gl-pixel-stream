@@ -63,6 +63,7 @@ The additional settings can be:
 - `flipY` (Boolean) whether to flip the output image on the Y axis (default false)
 - `format` a WebGL format like `gl.RGBA` or `gl.RGB` for reading, default `gl.RGBA`
 - `stride` (Number) the number of channels in a pixel, guessed from the specified `format`, or defaults to `4`
+- `onProgress` (Function) a function that has an `event` parameter with `current` and `total` chunk count, as well as `bounds` array with `[ x, y, width, height ]` from readPixels
 
 ## Running from Source
 
