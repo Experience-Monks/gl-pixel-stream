@@ -79,9 +79,7 @@ function glPixelStream (gl, fboHandle, size, opt) {
 
 function flipVertically (pixels, width, height, stride) {
   var rowLength = width * stride
-  // var temp = Buffer.alloc(rowLength)
   var temp = Buffer.allocUnsafe(rowLength)
-  // var temp = new Buffer(rowLength)
   var halfRows = Math.floor(height / 2)
   for (var rowIndex = 0; rowIndex < halfRows; rowIndex++) {
     var otherRowIndex = height - rowIndex - 1;
