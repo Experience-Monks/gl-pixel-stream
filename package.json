@@ -1,6 +1,6 @@
 {
   "name": "gl-pixel-stream",
-  "version": "1.0.2",
+  "version": "1.1.0",
   "description": "streaming gl.readPixels from an FBO",
   "main": "index.js",
   "license": "MIT",
