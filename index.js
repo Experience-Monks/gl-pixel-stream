@@ -1,5 +1,4 @@
 var Readable = require('readable-stream').Readable
-
 var DEFAULT_CHUNK_SIZE = 128
 
 module.exports = glPixelStream
@@ -48,11 +47,19 @@ function glPixelStream (gl, fboHandle, size, opt) {
     }
 
     gl.bindFramebuffer(gl.FRAMEBUFFER, fboHandle)
+    var status = gl.checkFramebufferStatus(gl.FRAMEBUFFER)
+    if (status !== gl.FRAMEBUFFER_COMPLETE) {
+      var self = this
+      return process.nextTick(function () {
+        self.emit('error', new Error('Framebuffer not complete, cannot gl.readPixels'))
+      })
+    }
+
     gl.viewport(0, 0, width, height)
     gl.readPixels(0, yOffset, width, chunkSize, format, gl.UNSIGNED_BYTE, chunkData)
     gl.bindFramebuffer(gl.FRAMEBUFFER, null)
 
-    var rowBuffer = new Buffer(chunkData.byteLength)
+    var rowBuffer = Buffer.from(chunkData)
     if (flipY) {
       for (var y = chunkSize - 1, c = 0; y >= 0; y--) {
         var offset = (y * width) * stride
@@ -60,12 +67,7 @@ function glPixelStream (gl, fboHandle, size, opt) {
           rowBuffer[c++] = chunkData[offset + j]
         }
       }
-    } else {
-      for (var x = 0; x < rowBuffer.length; x++) {
-        rowBuffer[x] = chunkData[x]
-      }
     }
-
     currentChunk++
     stream.push(rowBuffer)
   }
